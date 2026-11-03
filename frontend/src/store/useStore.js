@@ -2,12 +2,12 @@ import { create } from 'zustand'
 import { api } from '../lib/api.js'
 import { localTZ } from '../lib/format.js'
 import { registerCustom } from '../lib/exercises.js'
-import { DEMO, DEMO_SEEDED } from '../lib/demo.js'
+import { DEMO, DEMO_SEEDED, STANDALONE } from '../lib/demo.js'
 import { MOBILE, nativeLoad, nativeSave, syncReminder } from '../lib/mobile.js'
 
 const KEY = 'gym_state_v1'
 export const DEF = {
-  unit: 'kg', restSec: 90, sound: true, keepAwake: true, lang: 'en',
+  unit: 'kg', restSec: 90, sound: true, keepAwake: true, lang: 'zh-TW',
   theme: 'dark', accent: 'lime', body: 'male', targetW: null,
   bodyweight: [], routines: [], week: {}, dayPlan: {},
   exWeights: {}, workouts: [], active: null, customEx: [], gifSize: 'full',
@@ -159,6 +159,11 @@ export const useStore = create((set, get) => {
         }
         get().setGuest(true)
         syncReminder(get().S)
+        set({ ready: true })
+        return
+      }
+      if (STANDALONE) {
+        get().setGuest(true)
         set({ ready: true })
         return
       }

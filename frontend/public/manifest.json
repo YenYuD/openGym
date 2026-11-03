@@ -1,7 +1,8 @@
 {
   "name": "openGym",
   "short_name": "openGym",
-  "description": "Personal gym & body weight tracker",
+  "description": "個人健身與體重紀錄",
+  "lang": "zh-TW",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

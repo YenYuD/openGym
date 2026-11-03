@@ -4,21 +4,23 @@
 // Exercise instructions come from separately generated packs in src/instr/ (one per
 // language, from the upstream dataset) — also lazy-loaded on language switch.
 import { useSyncExternalStore } from 'react'
+import { EXDB } from './exercises-data.js'
 
 // UI languages. de/pt have no instruction pack upstream — instructions fall back to English.
 export const LANGS = {
   en: 'English', de: 'Deutsch', es: 'Español', fr: 'Français', it: 'Italiano',
-  pt: 'Português', pl: 'Polski', tr: 'Türkçe', ru: 'Русский', zh: '中文',
+  pt: 'Português', pl: 'Polski', tr: 'Türkçe', ru: 'Русский', 'zh-TW': '繁體中文', zh: '简体中文',
   ko: '한국어', hi: 'हिन्दी'
 }
-export const INSTR_LANGS = ['en', 'es', 'fr', 'it', 'tr', 'ru', 'zh', 'hi', 'pl', 'ko']
+export const INSTR_LANGS = ['en', 'es', 'fr', 'it', 'tr', 'ru', 'zh-TW', 'zh', 'hi', 'pl', 'ko']
 const DATE_LOCALES = {
   en: 'en-GB', de: 'de-DE', es: 'es-ES', fr: 'fr-FR', it: 'it-IT', pt: 'pt-PT',
-  pl: 'pl-PL', tr: 'tr-TR', ru: 'ru-RU', zh: 'zh-CN', ko: 'ko-KR', hi: 'hi-IN'
+  pl: 'pl-PL', tr: 'tr-TR', ru: 'ru-RU', 'zh-TW': 'zh-TW', zh: 'zh-CN', ko: 'ko-KR', hi: 'hi-IN'
 }
 
 const localePacks = import.meta.glob('../locales/*.js')
 const instrPacks = import.meta.glob('../instr/*.js')
+const namePacks = import.meta.glob('../names/*.js')
 
 let lang = 'en'
 let dict = {}
@@ -47,6 +49,11 @@ export async function setLang(l) {
     dict = l === 'en' ? {} : (await localePacks['../locales/' + l + '.js']()).default
     instr = l === 'en' || !INSTR_LANGS.includes(l) ? null : (await instrPacks['../instr/' + l + '.js']()).default
   } catch (e) { dict = {}; instr = null }
+  // Exercise names: keep the English original in `en` (search, importers) and show the
+  // translated name as `n` when this language has a name pack.
+  let names = null
+  try { if (namePacks['../names/' + l + '.js']) names = (await namePacks['../names/' + l + '.js']()).default } catch (e) { names = null }
+  EXDB.forEach(e => { if (e.en === undefined) e.en = e.n; e.n = (names && names[e.id]) || e.en })
   notify()
 }
 

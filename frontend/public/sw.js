@@ -28,10 +28,12 @@ self.addEventListener('notificationclick', e => {
 
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url)
-  if (e.request.method !== 'GET' || url.origin !== location.origin) return
+  // Exercise media may come off the jsDelivr CDN (standalone/demo builds) — cache it too.
+  const cdnMedia = url.hostname === 'cdn.jsdelivr.net' && url.pathname.includes('/exercises-dataset@')
+  if (e.request.method !== 'GET' || (url.origin !== location.origin && !cdnMedia)) return
   if (url.pathname.startsWith('/api/')) return    // never cache auth/data
 
-  const isMedia = url.pathname.includes('/img/') || url.pathname.includes('/gif/')
+  const isMedia = cdnMedia || url.pathname.includes('/img/') || url.pathname.includes('/gif/')
   if (isMedia) {
     e.respondWith(caches.open(CACHE).then(c => c.match(e.request).then(hit =>
       hit || fetch(e.request).then(res => { if (res.ok) c.put(e.request, res.clone()); return res })
